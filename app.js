@@ -94,3 +94,87 @@ const renderRecipes = (recipesToRender) => {
 
 // Initialize: Render all recipes when page loads
 renderRecipes(recipes);
+// -----------------------------
+// State Management
+// -----------------------------
+let currentFilter = "all";
+let currentSort = null;
+
+// -----------------------------
+// DOM Selection
+// -----------------------------
+const filterButtons = document.querySelectorAll('[data-filter]');
+const sortButtons = document.querySelectorAll('[data-sort]');
+
+// -----------------------------
+// Pure Filter Function
+// -----------------------------
+const filterRecipes = (recipesArray, filterType) => {
+
+    if (filterType === "easy" || 
+        filterType === "medium" || 
+        filterType === "hard") {
+        return recipesArray.filter(recipe => recipe.difficulty === filterType);
+    }
+
+    if (filterType === "quick") {
+        return recipesArray.filter(recipe => recipe.time < 30);
+    }
+
+    return recipesArray; // "all"
+};
+
+// -----------------------------
+// Pure Sort Function
+// -----------------------------
+const sortRecipes = (recipesArray, sortType) => {
+
+    if (!sortType) return recipesArray;
+
+    const sorted = [...recipesArray]; // copy to avoid mutation
+
+    if (sortType === "name") {
+        return sorted.sort((a, b) =>
+            a.title.localeCompare(b.title)
+        );
+    }
+
+    if (sortType === "time") {
+        return sorted.sort((a, b) =>
+            a.time - b.time
+        );
+    }
+
+    return recipesArray;
+};
+
+// -----------------------------
+// Central Update Function
+// -----------------------------
+const updateDisplay = () => {
+
+    const filteredRecipes = filterRecipes(recipes, currentFilter);
+    const sortedRecipes = sortRecipes(filteredRecipes, currentSort);
+
+    renderRecipes(sortedRecipes);
+};
+
+// -----------------------------
+// Event Listeners
+// -----------------------------
+filterButtons.forEach(button => {
+    button.addEventListener("click", () => {
+        currentFilter = button.dataset.filter;
+        updateDisplay();
+    });
+});
+
+sortButtons.forEach(button => {
+    button.addEventListener("click", () => {
+        currentSort = button.dataset.sort;
+        updateDisplay();
+    });
+});
+
+// Initial Load
+updateDisplay();
