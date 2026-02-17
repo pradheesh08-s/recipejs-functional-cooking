@@ -178,3 +178,142 @@ sortButtons.forEach(button => {
 
 // Initial Load
 updateDisplay();
+const recipe = [
+  {
+    id: 1,
+    name: "Pasta",
+    category: "Italian",
+    ingredients: [
+      "Pasta",
+      "Salt",
+      "Tomato Sauce",
+      "Olive Oil"
+    ],
+    steps: [
+      "Boil water",
+      {
+        step: "Cook pasta",
+        substeps: [
+          "Add pasta to boiling water",
+          "Cook for 8–10 minutes",
+          "Drain water"
+        ]
+      },
+      "Add sauce and mix well"
+    ]
+  },
+  {
+    id: 2,
+    name: "Fried Rice",
+    category: "Chinese",
+    ingredients: [
+      "Rice",
+      "Vegetables",
+      "Soy Sauce",
+      "Oil"
+    ],
+    steps: [
+      "Heat oil in pan",
+      {
+        step: "Add vegetables",
+        substeps: [
+          "Chop vegetables",
+          {
+            step: "Saute vegetables",
+            substeps: [
+              "Cook for 5 minutes",
+              "Add salt"
+            ]
+          }
+        ]
+      },
+      "Add rice and mix",
+      "Add soy sauce and cook for 2 minutes"
+    ]
+  }
+];
+const RecipeApp = (function () {
+
+  let recipeData = [];
+
+  function init(data) {
+    recipeData = data;
+    renderRecipes(recipeData);
+    attachEvents();
+  }
+
+  function renderRecipes(recipes) {
+    const container = document.getElementById("recipeContainer");
+    container.innerHTML = "";
+
+    recipes.forEach(recipe => {
+      container.innerHTML += `
+        <div class="card">
+          <h3>${recipe.name}</h3>
+          <button class="toggle-steps" data-id="${recipe.id}">
+            Show Steps
+          </button>
+          <button class="toggle-ingredients" data-id="${recipe.id}">
+            Show Ingredients
+          </button>
+          <div class="steps hidden" id="steps-${recipe.id}"></div>
+          <div class="ingredients hidden" id="ingredients-${recipe.id}">
+            <ul>
+              ${recipe.ingredients.map(item => `<li>${item}</li>`).join("")}
+            </ul>
+          </div>
+        </div>
+      `;
+    });
+  }
+
+  // 🔁 Recursive Function
+  function renderSteps(steps) {
+    let html = "<ul>";
+
+    steps.forEach(step => {
+      if (typeof step === "string") {
+        html += `<li>${step}</li>`;
+      } else {
+        html += `<li>${step.step}`;
+        html += renderSteps(step.substeps); // recursion here
+        html += `</li>`;
+      }
+    });
+
+    html += "</ul>";
+    return html;
+  }
+
+  function attachEvents() {
+    document
+      .getElementById("recipeContainer")
+      .addEventListener("click", function (e) {
+
+        if (e.target.classList.contains("toggle-steps")) {
+          const id = e.target.dataset.id;
+          const stepDiv = document.getElementById(`steps-${id}`);
+
+          const recipe = recipeData.find(r => r.id == id);
+
+          if (stepDiv.innerHTML === "") {
+            stepDiv.innerHTML = renderSteps(recipe.steps);
+          }
+
+          stepDiv.classList.toggle("hidden");
+        }
+
+        if (e.target.classList.contains("toggle-ingredients")) {
+          const id = e.target.dataset.id;
+          const ingDiv = document.getElementById(`ingredients-${id}`);
+          ingDiv.classList.toggle("hidden");
+        }
+      });
+  }
+
+  return {
+    init
+  };
+
+})();
+RecipeApp.init(recipes);
