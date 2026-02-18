@@ -71,25 +71,32 @@ const recipeContainer = document.querySelector('#recipe-container');
 
 // Function to create HTML for a single recipe card
 const createRecipeCard = (recipe) => {
-    return `
-        <div class="recipe-card" data-id="${recipe.id}">
-            <h3>${recipe.title}</h3>
-            <div class="recipe-meta">
-                <span>⏱️ ${recipe.time} min</span>
-                <span class="difficulty ${recipe.difficulty}">${recipe.difficulty}</span>
-            </div>
-            <p>${recipe.description}</p>
-        </div>
-    `;
+  const isFavorite = favorites.includes(recipe.id);
+  return `
+    <div class="recipe-card" data-id="${recipe.id}" style="position:relative;">
+      <button class="favorite-btn" data-favid="${recipe.id}" title="Toggle Favorite">${isFavorite ? '❤️' : '🤍'}</button>
+      <h3>${recipe.title}</h3>
+      <div class="recipe-meta">
+        <span>⏱️ ${recipe.time} min</span>
+        <span class="difficulty ${recipe.difficulty}">${recipe.difficulty}</span>
+      </div>
+      <p>${recipe.description}</p>
+    </div>
+  `;
 };
 
 // Function to render recipes to the DOM
 const renderRecipes = (recipesToRender) => {
-    // Transform each recipe object into an HTML string using map
-    const recipeCardsHTML = recipesToRender.map(createRecipeCard).join('');
-    
-    // Inject the combined HTML strings into the DOM container
-    recipeContainer.innerHTML = recipeCardsHTML;
+  const recipeCardsHTML = recipesToRender.map(createRecipeCard).join('');
+  recipeContainer.innerHTML = recipeCardsHTML;
+  // Attach favorite button listeners
+  document.querySelectorAll('.favorite-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const id = Number(btn.getAttribute('data-favid'));
+      toggleFavorite(id);
+    });
+  });
 };
 
 // Initialize: Render all recipes when page loads
@@ -151,12 +158,31 @@ const sortRecipes = (recipesArray, sortType) => {
 // -----------------------------
 // Central Update Function
 // -----------------------------
+let currentSearch = '';
+let showFavoritesOnly = false;
+let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+
+const filterBySearch = (recipesArray, searchValue) => {
+  if (!searchValue) return recipesArray;
+  const normalized = searchValue.toLowerCase();
+  return recipesArray.filter(recipe =>
+    recipe.title.toLowerCase().includes(normalized) ||
+    (recipe.description && recipe.description.toLowerCase().includes(normalized))
+  );
+};
+
+const filterByFavorites = (recipesArray) => {
+  if (!showFavoritesOnly) return recipesArray;
+  return recipesArray.filter(recipe => favorites.includes(recipe.id));
+};
+
 const updateDisplay = () => {
-
-    const filteredRecipes = filterRecipes(recipes, currentFilter);
-    const sortedRecipes = sortRecipes(filteredRecipes, currentSort);
-
-    renderRecipes(sortedRecipes);
+  let filtered = filterRecipes(recipes, currentFilter);
+  filtered = filterBySearch(filtered, currentSearch);
+  filtered = filterByFavorites(filtered);
+  const sorted = sortRecipes(filtered, currentSort);
+  renderRecipes(sorted);
+  updateRecipeCounter(sorted.length, recipes.length);
 };
 
 // -----------------------------
@@ -178,142 +204,52 @@ sortButtons.forEach(button => {
 
 // Initial Load
 updateDisplay();
-const recipe = [
-  {
-    id: 1,
-    name: "Pasta",
-    category: "Italian",
-    ingredients: [
-      "Pasta",
-      "Salt",
-      "Tomato Sauce",
-      "Olive Oil"
-    ],
-    steps: [
-      "Boil water",
-      {
-        step: "Cook pasta",
-        substeps: [
-          "Add pasta to boiling water",
-          "Cook for 8–10 minutes",
-          "Drain water"
-        ]
-      },
-      "Add sauce and mix well"
-    ]
-  },
-  {
-    id: 2,
-    name: "Fried Rice",
-    category: "Chinese",
-    ingredients: [
-      "Rice",
-      "Vegetables",
-      "Soy Sauce",
-      "Oil"
-    ],
-    steps: [
-      "Heat oil in pan",
-      {
-        step: "Add vegetables",
-        substeps: [
-          "Chop vegetables",
-          {
-            step: "Saute vegetables",
-            substeps: [
-              "Cook for 5 minutes",
-              "Add salt"
-            ]
-          }
-        ]
-      },
-      "Add rice and mix",
-      "Add soy sauce and cook for 2 minutes"
-    ]
-  }
-];
-const RecipeApp = (function () {
 
-  let recipeData = [];
-
-  function init(data) {
-    recipeData = data;
-    renderRecipes(recipeData);
-    attachEvents();
-  }
-
-  function renderRecipes(recipes) {
-    const container = document.getElementById("recipeContainer");
-    container.innerHTML = "";
-
-    recipes.forEach(recipe => {
-      container.innerHTML += `
-        <div class="card">
-          <h3>${recipe.name}</h3>
-          <button class="toggle-steps" data-id="${recipe.id}">
-            Show Steps
-          </button>
-          <button class="toggle-ingredients" data-id="${recipe.id}">
-            Show Ingredients
-          </button>
-          <div class="steps hidden" id="steps-${recipe.id}"></div>
-          <div class="ingredients hidden" id="ingredients-${recipe.id}">
-            <ul>
-              ${recipe.ingredients.map(item => `<li>${item}</li>`).join("")}
-            </ul>
-          </div>
-        </div>
-      `;
-    });
-  }
-
-  // 🔁 Recursive Function
-  function renderSteps(steps) {
-    let html = "<ul>";
-
-    steps.forEach(step => {
-      if (typeof step === "string") {
-        html += `<li>${step}</li>`;
-      } else {
-        html += `<li>${step.step}`;
-        html += renderSteps(step.substeps); // recursion here
-        html += `</li>`;
-      }
-    });
-
-    html += "</ul>";
-    return html;
-  }
-
-  function attachEvents() {
-    document
-      .getElementById("recipeContainer")
-      .addEventListener("click", function (e) {
-
-        if (e.target.classList.contains("toggle-steps")) {
-          const id = e.target.dataset.id;
-          const stepDiv = document.getElementById(`steps-${id}`);
-
-          const recipe = recipeData.find(r => r.id == id);
-
-          if (stepDiv.innerHTML === "") {
-            stepDiv.innerHTML = renderSteps(recipe.steps);
-          }
-
-          stepDiv.classList.toggle("hidden");
-        }
-
-        if (e.target.classList.contains("toggle-ingredients")) {
-          const id = e.target.dataset.id;
-          const ingDiv = document.getElementById(`ingredients-${id}`);
-          ingDiv.classList.toggle("hidden");
-        }
-      });
-  }
-
-  return {
-    init
+// Debounce utility
+function debounce(callback, delay = 400) {
+  let timeout;
+  return (...args) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => {
+      callback(...args);
+    }, delay);
   };
+}
 
-})();
-RecipeApp.init(recipes);
+// Search bar event
+const searchInput = document.getElementById('searchInput');
+if (searchInput) {
+  searchInput.addEventListener('input', debounce(e => {
+    currentSearch = e.target.value;
+    updateDisplay();
+  }, 400));
+}
+
+// Toggle favorite
+function toggleFavorite(recipeId) {
+  if (favorites.includes(recipeId)) {
+    favorites = favorites.filter(id => id !== recipeId);
+  } else {
+    favorites.push(recipeId);
+  }
+  localStorage.setItem('favorites', JSON.stringify(favorites));
+  updateDisplay();
+}
+
+// Favorites filter button
+const favoritesFilterBtn = document.getElementById('favoritesFilter');
+if (favoritesFilterBtn) {
+  favoritesFilterBtn.addEventListener('click', () => {
+    showFavoritesOnly = !showFavoritesOnly;
+    favoritesFilterBtn.textContent = showFavoritesOnly ? 'Show All' : 'Show Favorites';
+    updateDisplay();
+  });
+}
+
+// Recipe counter
+function updateRecipeCounter(visible, total) {
+  const counter = document.getElementById('recipeCounter');
+  if (counter) {
+    counter.textContent = `Showing ${visible} of ${total} recipes`;
+  }
+}
