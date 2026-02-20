@@ -68,7 +68,34 @@ const RecipeApp = (() => {
       difficulty: 'medium',
       description: 'Classic Italian pizza with fresh mozzarella, tomatoes, and basil.',
       category: 'pizza'
-    }
+    },
+    // South Indian A-Z
+    { id: 9, title: 'Appam', time: 30, difficulty: 'medium', description: 'Soft, lacy rice pancakes from Kerala, perfect with stew or coconut milk.', category: 'south indian' },
+    { id: 10, title: 'Bisi Bele Bath', time: 50, difficulty: 'medium', description: 'Karnataka rice-lentil dish with vegetables and spices.', category: 'south indian' },
+    { id: 11, title: 'Chettinad Chicken', time: 60, difficulty: 'hard', description: 'Spicy chicken curry from Chettinad, Tamil Nadu, with roasted spices.', category: 'south indian' },
+    { id: 12, title: 'Dosa', time: 20, difficulty: 'easy', description: 'Crispy fermented rice-lentil crepes, a breakfast staple.', category: 'south indian' },
+    { id: 13, title: 'Elaneer Payasam', time: 25, difficulty: 'easy', description: 'Chilled tender coconut milk dessert from Kerala.', category: 'south indian' },
+    { id: 14, title: 'Filter Coffee', time: 10, difficulty: 'easy', description: 'Strong, aromatic South Indian drip-brewed coffee.', category: 'south indian' },
+    { id: 15, title: 'Gongura Pachadi', time: 15, difficulty: 'easy', description: 'Andhra-style tangy chutney made with gongura leaves.', category: 'south indian' },
+    { id: 16, title: 'Hyderabadi Biryani', time: 90, difficulty: 'hard', description: 'Fragrant rice and meat biryani from Hyderabad, South India style.', category: 'south indian' },
+    { id: 17, title: 'Idli', time: 15, difficulty: 'easy', description: 'Steamed rice-lentil cakes, soft and fluffy, served with chutney and sambar.', category: 'south indian' },
+    { id: 18, title: 'Jackfruit Curry', time: 40, difficulty: 'medium', description: 'Kerala-style curry with tender jackfruit pieces in coconut gravy.', category: 'south indian' },
+    { id: 19, title: 'Kootu', time: 35, difficulty: 'easy', description: 'Tamil Nadu mixed vegetable and lentil stew.', category: 'south indian' },
+    { id: 20, title: 'Lemon Rice', time: 20, difficulty: 'easy', description: 'Tangy, yellow rice flavored with lemon juice and spices.', category: 'south indian' },
+    { id: 21, title: 'Medu Vada', time: 30, difficulty: 'medium', description: 'Crispy, savory lentil doughnuts, deep-fried and served with chutney.', category: 'south indian' },
+    { id: 22, title: 'Neer Dosa', time: 20, difficulty: 'easy', description: 'Thin, soft rice crepes from Karnataka.', category: 'south indian' },
+    { id: 23, title: 'Olan', time: 25, difficulty: 'easy', description: 'Kerala stew of ash gourd and red beans in coconut milk.', category: 'south indian' },
+    { id: 24, title: 'Pesarattu', time: 25, difficulty: 'easy', description: 'Andhra Pradesh green gram crepes, protein-rich and healthy.', category: 'south indian' },
+    { id: 25, title: 'Quinoa Upma', time: 30, difficulty: 'easy', description: 'Modern upma with quinoa and vegetables, South Indian style.', category: 'south indian' },
+    { id: 26, title: 'Rasam', time: 20, difficulty: 'easy', description: 'Spicy, tangy South Indian soup with tamarind and tomatoes.', category: 'south indian' },
+    { id: 27, title: 'Sambar', time: 35, difficulty: 'easy', description: 'Lentil and vegetable stew with tamarind, a South Indian staple.', category: 'south indian' },
+    { id: 28, title: 'Thayir Sadam', time: 10, difficulty: 'easy', description: 'Curd rice, a cooling comfort food from Tamil Nadu.', category: 'south indian' },
+    { id: 29, title: 'Uthappam', time: 25, difficulty: 'easy', description: 'Thick, soft rice-lentil pancakes topped with onions and veggies.', category: 'south indian' },
+    { id: 30, title: 'Vangi Bath', time: 30, difficulty: 'medium', description: 'Brinjal (eggplant) rice from Karnataka, spiced and flavorful.', category: 'south indian' },
+    { id: 31, title: 'Wheat Halwa', time: 45, difficulty: 'medium', description: 'Rich, glossy halwa made from wheat flour, ghee, and sugar.', category: 'south indian' },
+    { id: 32, title: 'Xacuti', time: 60, difficulty: 'hard', description: 'Goan coconut-based curry, sometimes included in South Indian cuisine.', category: 'south indian' },
+    { id: 33, title: 'Yellu Bella', time: 15, difficulty: 'easy', description: 'Karnataka festive mix of sesame, jaggery, coconut, and peanuts.', category: 'south indian' },
+    { id: 34, title: 'Zucchini Kootu', time: 25, difficulty: 'easy', description: 'Modern kootu with zucchini and lentils, South Indian style.', category: 'south indian' }
   ];
 
   const state = {
