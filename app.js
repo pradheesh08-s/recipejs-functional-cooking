@@ -1,255 +1,328 @@
-// Recipe data - Foundation for all 4 parts
-const recipes = [
+const RecipeApp = (() => {
+  const STORAGE_KEY = 'favorites';
+  const DEFAULT_FILTER = 'all';
+  const DEFAULT_SORT = 'name';
+  const SEARCH_DEBOUNCE_MS = 350;
+
+  const recipes = [
     {
-        id: 1,
-        title: "Classic Spaghetti Carbonara",
-        time: 25,
-        difficulty: "easy",
-        description: "A creamy Italian pasta dish made with eggs, cheese, pancetta, and black pepper.",
-        category: "pasta"
+      id: 1,
+      title: 'Classic Spaghetti Carbonara',
+      time: 25,
+      difficulty: 'easy',
+      description: 'A creamy Italian pasta dish made with eggs, cheese, pancetta, and black pepper.',
+      category: 'pasta'
     },
     {
-        id: 2,
-        title: "Chicken Tikka Masala",
-        time: 45,
-        difficulty: "medium",
-        description: "Tender chicken pieces in a creamy, spiced tomato sauce.",
-        category: "curry"
+      id: 2,
+      title: 'Chicken Tikka Masala',
+      time: 45,
+      difficulty: 'medium',
+      description: 'Tender chicken pieces in a creamy, spiced tomato sauce.',
+      category: 'curry'
     },
     {
-        id: 3,
-        title: "Homemade Croissants",
-        time: 180,
-        difficulty: "hard",
-        description: "Buttery, flaky French pastries that require patience but deliver amazing results.",
-        category: "baking"
+      id: 3,
+      title: 'Homemade Croissants',
+      time: 180,
+      difficulty: 'hard',
+      description: 'Buttery, flaky French pastries that require patience but deliver amazing results.',
+      category: 'baking'
     },
     {
-        id: 4,
-        title: "Greek Salad",
-        time: 15,
-        difficulty: "easy",
-        description: "Fresh vegetables, feta cheese, and olives tossed in olive oil and herbs.",
-        category: "salad"
+      id: 4,
+      title: 'Greek Salad',
+      time: 15,
+      difficulty: 'easy',
+      description: 'Fresh vegetables, feta cheese, and olives tossed in olive oil and herbs.',
+      category: 'salad'
     },
     {
-        id: 5,
-        title: "Beef Wellington",
-        time: 120,
-        difficulty: "hard",
-        description: "Tender beef fillet coated with mushroom duxelles and wrapped in puff pastry.",
-        category: "meat"
+      id: 5,
+      title: 'Beef Wellington',
+      time: 120,
+      difficulty: 'hard',
+      description: 'Tender beef fillet coated with mushroom duxelles and wrapped in puff pastry.',
+      category: 'meat'
     },
     {
-        id: 6,
-        title: "Vegetable Stir Fry",
-        time: 20,
-        difficulty: "easy",
-        description: "Colorful mixed vegetables cooked quickly in a savory sauce.",
-        category: "vegetarian"
+      id: 6,
+      title: 'Vegetable Stir Fry',
+      time: 20,
+      difficulty: 'easy',
+      description: 'Colorful mixed vegetables cooked quickly in a savory sauce.',
+      category: 'vegetarian'
     },
     {
-        id: 7,
-        title: "Pad Thai",
-        time: 30,
-        difficulty: "medium",
-        description: "Thai stir-fried rice noodles with shrimp, peanuts, and tangy tamarind sauce.",
-        category: "noodles"
+      id: 7,
+      title: 'Pad Thai',
+      time: 30,
+      difficulty: 'medium',
+      description: 'Thai stir-fried rice noodles with shrimp, peanuts, and tangy tamarind sauce.',
+      category: 'noodles'
     },
     {
-        id: 8,
-        title: "Margherita Pizza",
-        time: 60,
-        difficulty: "medium",
-        description: "Classic Italian pizza with fresh mozzarella, tomatoes, and basil.",
-        category: "pizza"
+      id: 8,
+      title: 'Margherita Pizza',
+      time: 60,
+      difficulty: 'medium',
+      description: 'Classic Italian pizza with fresh mozzarella, tomatoes, and basil.',
+      category: 'pizza'
     }
-];
+  ];
 
-// DOM Selection - Get the container where recipes will be displayed
-const recipeContainer = document.querySelector('#recipe-container');
+  const state = {
+    filter: DEFAULT_FILTER,
+    sort: DEFAULT_SORT,
+    search: '',
+    favoritesOnly: false,
+    favorites: readFavorites()
+  };
 
-// Function to create HTML for a single recipe card
-const createRecipeCard = (recipe) => {
-  const isFavorite = favorites.includes(recipe.id);
-  return `
-    <div class="recipe-card" data-id="${recipe.id}" style="position:relative;">
-      <button class="favorite-btn" data-favid="${recipe.id}" title="Toggle Favorite">${isFavorite ? '❤️' : '🤍'}</button>
-      <h3>${recipe.title}</h3>
-      <div class="recipe-meta">
-        <span>⏱️ ${recipe.time} min</span>
-        <span class="difficulty ${recipe.difficulty}">${recipe.difficulty}</span>
-      </div>
-      <p>${recipe.description}</p>
-    </div>
-  `;
-};
+  const dom = {
+    recipeContainer: document.querySelector('#recipe-container'),
+    recipeCounter: document.querySelector('#recipeCounter'),
+    searchInput: document.querySelector('#searchInput'),
+    clearSearchButton: document.querySelector('#clearSearch'),
+    resetControlsButton: document.querySelector('#resetControls'),
+    favoritesFilterButton: document.querySelector('#favoritesFilter'),
+    filterButtons: document.querySelectorAll('[data-filter]'),
+    sortButtons: document.querySelectorAll('[data-sort]')
+  };
 
-// Function to render recipes to the DOM
-const renderRecipes = (recipesToRender) => {
-  const recipeCardsHTML = recipesToRender.map(createRecipeCard).join('');
-  recipeContainer.innerHTML = recipeCardsHTML;
-  // Attach favorite button listeners
-  document.querySelectorAll('.favorite-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const id = Number(btn.getAttribute('data-favid'));
-      toggleFavorite(id);
+  function init() {
+    bindEvents();
+    updateDisplay();
+  }
+
+  function bindEvents() {
+    dom.filterButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        state.filter = button.dataset.filter;
+        updateDisplay();
+      });
     });
-  });
-};
 
-// Initialize: Render all recipes when page loads
-renderRecipes(recipes);
-// -----------------------------
-// State Management
-// -----------------------------
-let currentFilter = "all";
-let currentSort = null;
+    dom.sortButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        state.sort = button.dataset.sort;
+        updateDisplay();
+      });
+    });
 
-// -----------------------------
-// DOM Selection
-// -----------------------------
-const filterButtons = document.querySelectorAll('[data-filter]');
-const sortButtons = document.querySelectorAll('[data-sort]');
+    if (dom.searchInput) {
+      const debouncedSearch = debounce((searchText) => {
+        state.search = searchText;
+        updateDisplay();
+      }, SEARCH_DEBOUNCE_MS);
 
-// -----------------------------
-// Pure Filter Function
-// -----------------------------
-const filterRecipes = (recipesArray, filterType) => {
-
-    if (filterType === "easy" || 
-        filterType === "medium" || 
-        filterType === "hard") {
-        return recipesArray.filter(recipe => recipe.difficulty === filterType);
+      dom.searchInput.addEventListener(
+        'input',
+        (event) => {
+          debouncedSearch(event.target.value);
+        }
+      );
     }
 
-    if (filterType === "quick") {
-        return recipesArray.filter(recipe => recipe.time < 30);
+    if (dom.clearSearchButton) {
+      dom.clearSearchButton.addEventListener('click', () => {
+        state.search = '';
+        if (dom.searchInput) {
+          dom.searchInput.value = '';
+          dom.searchInput.focus();
+        }
+        updateDisplay();
+      });
     }
 
-    return recipesArray; // "all"
-};
-
-// -----------------------------
-// Pure Sort Function
-// -----------------------------
-const sortRecipes = (recipesArray, sortType) => {
-
-    if (!sortType) return recipesArray;
-
-    const sorted = [...recipesArray]; // copy to avoid mutation
-
-    if (sortType === "name") {
-        return sorted.sort((a, b) =>
-            a.title.localeCompare(b.title)
-        );
+    if (dom.favoritesFilterButton) {
+      dom.favoritesFilterButton.addEventListener('click', () => {
+        state.favoritesOnly = !state.favoritesOnly;
+        updateDisplay();
+      });
     }
 
-    if (sortType === "time") {
-        return sorted.sort((a, b) =>
-            a.time - b.time
-        );
+    if (dom.resetControlsButton) {
+      dom.resetControlsButton.addEventListener('click', () => {
+        state.filter = DEFAULT_FILTER;
+        state.sort = DEFAULT_SORT;
+        state.search = '';
+        state.favoritesOnly = false;
+
+        if (dom.searchInput) {
+          dom.searchInput.value = '';
+        }
+
+        updateDisplay();
+      });
+    }
+
+    if (dom.recipeContainer) {
+      dom.recipeContainer.addEventListener('click', (event) => {
+        const favoriteButton = event.target.closest('.favorite-btn');
+        if (!favoriteButton) return;
+
+        event.stopPropagation();
+        const recipeId = Number(favoriteButton.dataset.favid);
+        toggleFavorite(recipeId);
+      });
+    }
+  }
+
+  function updateDisplay() {
+    const visibleRecipes = applyAllTransforms(recipes);
+    renderRecipes(visibleRecipes);
+    renderCounter(visibleRecipes.length, recipes.length);
+    syncControlStates();
+  }
+
+  function applyAllTransforms(recipesArray) {
+    let transformed = filterByDifficulty(recipesArray, state.filter);
+    transformed = filterBySearch(transformed, state.search);
+    transformed = filterByFavorites(transformed, state.favoritesOnly, state.favorites);
+    transformed = sortRecipes(transformed, state.sort);
+    return transformed;
+  }
+
+  function renderRecipes(recipesToRender) {
+    if (!dom.recipeContainer) return;
+
+    if (!recipesToRender.length) {
+      dom.recipeContainer.innerHTML = '<div class="empty-state">No recipes match your current filters.</div>';
+      return;
+    }
+
+    dom.recipeContainer.innerHTML = recipesToRender.map(createRecipeCard).join('');
+  }
+
+  function createRecipeCard(recipe) {
+    const isFavorite = state.favorites.includes(recipe.id);
+    const favoriteIcon = isFavorite ? '❤️' : '🤍';
+
+    return `
+      <article class="recipe-card" data-id="${recipe.id}">
+        <button
+          class="favorite-btn"
+          data-favid="${recipe.id}"
+          type="button"
+          aria-label="${isFavorite ? 'Remove from favorites' : 'Add to favorites'}"
+          title="${isFavorite ? 'Remove from favorites' : 'Add to favorites'}"
+        >${favoriteIcon}</button>
+        <h3>${recipe.title}</h3>
+        <div class="recipe-meta">
+          <span>⏱️ ${recipe.time} min</span>
+          <span class="difficulty ${recipe.difficulty}">${recipe.difficulty}</span>
+        </div>
+        <p>${recipe.description}</p>
+      </article>
+    `;
+  }
+
+  function renderCounter(visibleCount, totalCount) {
+    if (dom.recipeCounter) {
+      dom.recipeCounter.textContent = `Showing ${visibleCount} of ${totalCount} recipes`;
+    }
+  }
+
+  function syncControlStates() {
+    setActiveButton(dom.filterButtons, state.filter, 'filter');
+    setActiveButton(dom.sortButtons, state.sort, 'sort');
+
+    if (dom.favoritesFilterButton) {
+      dom.favoritesFilterButton.classList.toggle('is-active', state.favoritesOnly);
+      dom.favoritesFilterButton.setAttribute('aria-pressed', String(state.favoritesOnly));
+    }
+
+    if (dom.clearSearchButton) {
+      const hasSearchText = state.search.trim().length > 0;
+      dom.clearSearchButton.disabled = !hasSearchText;
+      dom.clearSearchButton.classList.toggle('is-active', hasSearchText);
+    }
+  }
+
+  function setActiveButton(buttons, activeValue, dataKey) {
+    buttons.forEach(button => {
+      const isActive = button.dataset[dataKey] === activeValue;
+      button.classList.toggle('is-active', isActive);
+    });
+  }
+
+  function toggleFavorite(recipeId) {
+    if (state.favorites.includes(recipeId)) {
+      state.favorites = state.favorites.filter(id => id !== recipeId);
+    } else {
+      state.favorites = [...state.favorites, recipeId];
+    }
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state.favorites));
+    updateDisplay();
+  }
+
+  function filterByDifficulty(recipesArray, filterType) {
+    if (filterType === 'easy' || filterType === 'medium' || filterType === 'hard') {
+      return recipesArray.filter(recipe => recipe.difficulty === filterType);
+    }
+
+    if (filterType === 'quick') {
+      return recipesArray.filter(recipe => recipe.time < 30);
     }
 
     return recipesArray;
-};
+  }
 
-// -----------------------------
-// Central Update Function
-// -----------------------------
-let currentSearch = '';
-let showFavoritesOnly = false;
-let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+  function filterBySearch(recipesArray, searchValue) {
+    if (!searchValue.trim()) return recipesArray;
 
-const filterBySearch = (recipesArray, searchValue) => {
-  if (!searchValue) return recipesArray;
-  const normalized = searchValue.toLowerCase();
-  return recipesArray.filter(recipe =>
-    recipe.title.toLowerCase().includes(normalized) ||
-    (recipe.description && recipe.description.toLowerCase().includes(normalized))
-  );
-};
+    const normalizedSearch = searchValue.toLowerCase();
+    return recipesArray.filter(recipe => (
+      recipe.title.toLowerCase().includes(normalizedSearch)
+      || recipe.description.toLowerCase().includes(normalizedSearch)
+      || recipe.category.toLowerCase().includes(normalizedSearch)
+    ));
+  }
 
-const filterByFavorites = (recipesArray) => {
-  if (!showFavoritesOnly) return recipesArray;
-  return recipesArray.filter(recipe => favorites.includes(recipe.id));
-};
+  function filterByFavorites(recipesArray, favoritesOnly, favoriteIds) {
+    if (!favoritesOnly) return recipesArray;
+    return recipesArray.filter(recipe => favoriteIds.includes(recipe.id));
+  }
 
-const updateDisplay = () => {
-  let filtered = filterRecipes(recipes, currentFilter);
-  filtered = filterBySearch(filtered, currentSearch);
-  filtered = filterByFavorites(filtered);
-  const sorted = sortRecipes(filtered, currentSort);
-  renderRecipes(sorted);
-  updateRecipeCounter(sorted.length, recipes.length);
-};
+  function sortRecipes(recipesArray, sortType) {
+    const sorted = [...recipesArray];
 
-// -----------------------------
-// Event Listeners
-// -----------------------------
-filterButtons.forEach(button => {
-    button.addEventListener("click", () => {
-        currentFilter = button.dataset.filter;
-        updateDisplay();
-    });
-});
+    if (sortType === 'name') {
+      return sorted.sort((a, b) => a.title.localeCompare(b.title, undefined, { sensitivity: 'base' }));
+    }
 
-sortButtons.forEach(button => {
-    button.addEventListener("click", () => {
-        currentSort = button.dataset.sort;
-        updateDisplay();
-    });
-});
+    if (sortType === 'time') {
+      return sorted.sort((a, b) => a.time - b.time);
+    }
 
-// Initial Load
-updateDisplay();
+    return sorted;
+  }
 
-// Debounce utility
-function debounce(callback, delay = 400) {
-  let timeout;
-  return (...args) => {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => {
-      callback(...args);
-    }, delay);
+  function debounce(callback, delay) {
+    let timeoutId;
+    return (...args) => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        callback(...args);
+      }, delay);
+    };
+  }
+
+  function readFavorites() {
+    try {
+      const rawValue = localStorage.getItem(STORAGE_KEY);
+      const parsedValue = rawValue ? JSON.parse(rawValue) : [];
+      return Array.isArray(parsedValue) ? parsedValue : [];
+    } catch {
+      return [];
+    }
+  }
+
+  return {
+    init
   };
-}
+})();
 
-// Search bar event
-const searchInput = document.getElementById('searchInput');
-if (searchInput) {
-  searchInput.addEventListener('input', debounce(e => {
-    currentSearch = e.target.value;
-    updateDisplay();
-  }, 400));
-}
-
-// Toggle favorite
-function toggleFavorite(recipeId) {
-  if (favorites.includes(recipeId)) {
-    favorites = favorites.filter(id => id !== recipeId);
-  } else {
-    favorites.push(recipeId);
-  }
-  localStorage.setItem('favorites', JSON.stringify(favorites));
-  updateDisplay();
-}
-
-// Favorites filter button
-const favoritesFilterBtn = document.getElementById('favoritesFilter');
-if (favoritesFilterBtn) {
-  favoritesFilterBtn.addEventListener('click', () => {
-    showFavoritesOnly = !showFavoritesOnly;
-    favoritesFilterBtn.textContent = showFavoritesOnly ? 'Show All' : 'Show Favorites';
-    updateDisplay();
-  });
-}
-
-// Recipe counter
-function updateRecipeCounter(visible, total) {
-  const counter = document.getElementById('recipeCounter');
-  if (counter) {
-    counter.textContent = `Showing ${visible} of ${total} recipes`;
-  }
-}
+RecipeApp.init();
