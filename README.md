@@ -2,7 +2,8 @@
 
 # RecipeJS Functional Cooking
 
-![Recipe dashboard image](attachments/recipe-management-dashboard.png)
+<img width="1869" height="926" alt="image" src="https://github.com/user-attachments/assets/fe716577-61da-42c3-a428-ee4297e67cb1" />
+
 
 A modern, functional programming-inspired recipe companion app for the web. Easily browse, search, filter, and favorite recipes in a clean, responsive interface.
 
