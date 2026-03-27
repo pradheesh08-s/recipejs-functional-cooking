@@ -25,6 +25,44 @@ body {
     color: var(--text);
     min-height: 100vh;
     line-height: 1.55;
+    position: relative;
+    overflow-x: hidden;
+}
+
+body::before,
+body::after {
+    content: '';
+    position: fixed;
+    inset: auto;
+    pointer-events: none;
+    z-index: -2;
+}
+
+body::before {
+    width: 38vmax;
+    height: 38vmax;
+    left: -10vmax;
+    top: 12vmax;
+    background: radial-gradient(circle, rgba(94, 234, 212, 0.16) 0%, rgba(94, 234, 212, 0) 70%);
+    filter: blur(8px);
+    animation: driftGlowA 18s ease-in-out infinite;
+}
+
+body::after {
+    width: 42vmax;
+    height: 42vmax;
+    right: -14vmax;
+    top: -8vmax;
+    background: radial-gradient(circle, rgba(129, 140, 248, 0.2) 0%, rgba(129, 140, 248, 0) 72%);
+    filter: blur(10px);
+    animation: driftGlowB 22s ease-in-out infinite;
+}
+
+.site-header,
+.results,
+.panel {
+    position: relative;
+    z-index: 1;
 }
 
 .shell {
@@ -36,6 +74,7 @@ body {
     border-bottom: 1px solid rgba(129, 140, 248, 0.25);
     background: rgba(10, 16, 34, 0.45);
     backdrop-filter: blur(6px);
+    box-shadow: 0 0 28px rgba(129, 140, 248, 0.12);
 }
 
 .site-header .shell {
@@ -86,6 +125,58 @@ h1 {
 .controls h2 {
     font-size: 1.05rem;
     margin-bottom: 0.9rem;
+}
+
+.theme-control-wrap {
+    margin-bottom: 0.85rem;
+}
+
+.theme-edit-btn {
+    width: auto;
+    padding: 0.35rem 0.58rem;
+    font-size: 0.75rem;
+    border-radius: 7px;
+    background: linear-gradient(120deg, rgba(129, 140, 248, 0.22), rgba(94, 234, 212, 0.2));
+    border-color: rgba(129, 140, 248, 0.6);
+}
+
+.theme-edit-btn:hover {
+    background: linear-gradient(120deg, rgba(129, 140, 248, 0.34), rgba(94, 234, 212, 0.28));
+}
+
+.theme-editor {
+    margin-top: 0.55rem;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.55rem;
+    background: rgba(17, 26, 53, 0.8);
+    display: grid;
+    gap: 0.45rem;
+}
+
+.theme-field {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+    color: var(--text-soft);
+    font-size: 0.8rem;
+}
+
+.theme-field input[type='color'] {
+    width: 2.2rem;
+    height: 1.5rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: transparent;
+    padding: 0;
+}
+
+.theme-reset-btn {
+    margin-top: 0.2rem;
+    font-size: 0.76rem;
+    padding: 0.36rem 0.56rem;
+    background: #26396f;
 }
 
 .control-group {
@@ -210,6 +301,19 @@ button.is-active {
     border-radius: 16px;
     padding: 1rem;
     box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+.results::before {
+    content: '';
+    position: absolute;
+    inset: -40% auto auto -20%;
+    width: 70%;
+    height: 70%;
+    background: radial-gradient(circle, rgba(45, 212, 191, 0.09) 0%, rgba(45, 212, 191, 0) 70%);
+    pointer-events: none;
+    z-index: -1;
+    animation: pulseAura 10s ease-in-out infinite;
 }
 
 .results-head h2 {
@@ -232,11 +336,36 @@ button.is-active {
     position: relative;
     min-height: 210px;
     transition: transform 0.18s ease, border-color 0.18s ease;
+    cursor: pointer;
+    overflow: hidden;
 }
 
 .recipe-card:hover {
     transform: translateY(-2px);
     border-color: #4c68b1;
+    box-shadow: 0 0 0 1px rgba(94, 234, 212, 0.25), 0 10px 22px rgba(45, 212, 191, 0.14);
+}
+
+.recipe-card::before {
+    content: '';
+    position: absolute;
+    top: -120%;
+    left: -30%;
+    width: 48%;
+    height: 320%;
+    background: linear-gradient(120deg, rgba(255, 255, 255, 0), rgba(188, 255, 247, 0.2), rgba(255, 255, 255, 0));
+    transform: rotate(18deg);
+    transition: transform 0.6s ease;
+    pointer-events: none;
+}
+
+.recipe-card:hover::before {
+    transform: translateX(320%) rotate(18deg);
+}
+
+.recipe-card:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
 }
 
 .recipe-card h3 {
@@ -297,6 +426,7 @@ button.is-active {
 
 .favorite-btn:hover {
     background: #253a77;
+    box-shadow: 0 0 10px rgba(129, 140, 248, 0.35);
 }
 
 .empty-state {
@@ -307,6 +437,158 @@ button.is-active {
     border-radius: 12px;
     padding: 1.2rem;
     text-align: center;
+}
+
+.recipe-steps {
+    margin-left: 1rem;
+    color: #d8e3ff;
+    font-size: 0.9rem;
+    display: grid;
+    gap: 0.38rem;
+}
+
+.recipe-details-empty {
+    color: var(--text-soft);
+    font-size: 0.9rem;
+}
+
+.recipe-page-layout {
+    display: block;
+    padding: 1.2rem 0 2rem;
+}
+
+.recipe-process-panel {
+    padding: 1rem;
+}
+
+.recipe-description {
+    color: #c9d6f7;
+    margin-bottom: 0.8rem;
+}
+
+.section-title {
+    font-size: 1rem;
+    color: var(--primary);
+    margin: 0.8rem 0 0.45rem;
+}
+
+.ingredients-list {
+    margin-left: 1rem;
+    color: #d8e3ff;
+    font-size: 0.9rem;
+    display: grid;
+    gap: 0.35rem;
+}
+
+.ingredient-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.7rem;
+}
+
+.ingredients-editor-label {
+    display: block;
+    color: var(--text-soft);
+    font-size: 0.82rem;
+    margin-bottom: 0.35rem;
+}
+
+.ingredients-editor {
+    width: 100%;
+    border: 1px solid var(--border);
+    background: var(--bg-soft);
+    color: var(--text);
+    border-radius: 10px;
+    padding: 0.62rem 0.75rem;
+    font-size: 0.9rem;
+    resize: vertical;
+}
+
+.ingredients-editor:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.22);
+}
+
+.save-btn {
+    background: #1f7a66;
+    border-color: #2aa488;
+}
+
+.save-btn:hover {
+    background: #27967d;
+}
+
+.cancel-btn {
+    background: #36436c;
+}
+
+.lock-btn {
+    background: #5f2f37;
+    border-color: #9d4655;
+}
+
+.lock-btn:hover {
+    background: #7a3a46;
+}
+
+.ingredient-status {
+    color: var(--text-soft);
+    font-size: 0.84rem;
+    margin-top: 0.5rem;
+}
+
+.back-btn {
+    margin-top: 1rem;
+    background: #1f7a66;
+    border-color: #2aa488;
+}
+
+.back-btn:hover {
+    background: #27967d;
+}
+
+@keyframes driftGlowA {
+    0%,
+    100% {
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+    50% {
+        transform: translate3d(2.5vmax, -1.5vmax, 0) scale(1.08);
+    }
+}
+
+@keyframes driftGlowB {
+    0%,
+    100% {
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+    50% {
+        transform: translate3d(-2.2vmax, 2vmax, 0) scale(1.06);
+    }
+}
+
+@keyframes pulseAura {
+    0%,
+    100% {
+        opacity: 0.75;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.08);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body::before,
+    body::after,
+    .results::before,
+    .recipe-card::before {
+        animation: none;
+        transition: none;
+    }
 }
 
 @media (max-width: 980px) {

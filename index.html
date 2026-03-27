@@ -18,6 +18,28 @@
     <main class="shell app-layout">
         <aside class="panel controls" aria-label="Recipe controls">
             <h2>Controls</h2>
+            <div class="theme-control-wrap">
+                <button id="openThemeEditor" class="theme-edit-btn" type="button" aria-expanded="false">Edit Colors</button>
+                <div id="themeEditorPanel" class="theme-editor" hidden>
+                    <label class="theme-field" for="themePrimary">
+                        <span>Primary</span>
+                        <input id="themePrimary" type="color" value="#5eead4">
+                    </label>
+                    <label class="theme-field" for="themeAccent">
+                        <span>Accent</span>
+                        <input id="themeAccent" type="color" value="#818cf8">
+                    </label>
+                    <label class="theme-field" for="themeBackground">
+                        <span>Background</span>
+                        <input id="themeBackground" type="color" value="#0a1022">
+                    </label>
+                    <label class="theme-field" for="themeCard">
+                        <span>Card</span>
+                        <input id="themeCard" type="color" value="#172449">
+                    </label>
+                    <button id="resetThemeColors" class="theme-reset-btn" type="button">Reset Colors</button>
+                </div>
+            </div>
 
             <div class="search-wrap">
                 <label for="searchInput">Search Recipes</label>
